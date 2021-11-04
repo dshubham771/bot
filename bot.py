@@ -552,7 +552,7 @@ def bot():
             print("Avg buy ", float_coin_price, " Current price ", lastPrice, " Limit sell at ", limit_price,
                   "Stoploss at ", (1 - stoploss_percentage / 100) * float_coin_price)
 
-            if (lastPrice >= limit_price):
+            if lastPrice >= limit_price:
 
                 print("inside profit cell ")
                 file_log.write("\n *** Inside profit cell  ***")
@@ -575,7 +575,9 @@ def bot():
                             file_log.write("\nLimit trailed to :" + str(limit_price))
                             file_log.flush()
 
-                        elif lastPrice < original_limit * 0.98 or lastPrice < maxPrice * 0.85:
+                        elif lastPrice < original_limit * 0.98 or lastPrice < (maxPrice-original_limit) * 0.85:
+                            break
+                        elif time.time() - startTime > 60*60*2:
                             break
 
                     placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
