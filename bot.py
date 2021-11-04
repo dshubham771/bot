@@ -570,7 +570,7 @@ def bot():
                             file_log.write("\nLimit trailed to :" + str(limit_price))
                             file_log.flush()
 
-                        elif lastPrice < original_limit * 0.98 or lastPrice < maxPrice * 0.60:
+                        elif lastPrice < original_limit * 0.98 or lastPrice < maxPrice * 0.85:
                             break
 
                     placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
