@@ -1,9 +1,6 @@
 import sys
 
 sys.path.append("/usr/local/lib/python3.9/site-packages")
-import math
-import random
-import xlwt
 from xlwt import Workbook
 
 wb = Workbook()
@@ -526,12 +523,8 @@ def bot():
 
             original_limit = float_coin_price * (1 + profit_percentage / 100)
 
-            file_log.write(
-                "\n \nOrder " + str(order_number) + " placed :" + order_coin_name + " average buy price " + str(
-                    float_coin_price) + " Limit sell at " + str(float_coin_price * (1 + profit_percentage / 100)))
-            file_log.write(
-                "\nCoin parameters: Recent Volume % = " + str(coin_recent_vol_percentage) + " Pings = " + str(
-                    coin_pings) + " Net Volume % = " + str(coin_net_vol_percentage))
+            file_log.write("\n \nOrder " + str(order_number) + " placed :" + order_coin_name + " average buy price " + str(float_coin_price) + " Limit sell at " + str(float_coin_price * (1 + profit_percentage / 100)))
+            file_log.write("\nCoin parameters: Recent Volume % = " + str(coin_recent_vol_percentage) + " Pings = " + str(coin_pings) + " Net Volume % = " + str(coin_net_vol_percentage))
             file_log.flush()
             order_number += 1
 
