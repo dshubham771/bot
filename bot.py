@@ -25,7 +25,8 @@ import math
 
 import time
 
-blacklist = ["REEFBTC", "CELRBTC", "VIBBTC", "ETCBTC", "COSBTC", "PHBBTC", "DGBBTC", "ADABTC", "ETHBTC", "SOLBTC", "MATICBTC"]
+blacklist = ["REEFBTC", "CELRBTC", "VIBBTC", "ETCBTC", "COSBTC", "PHBBTC", "DGBBTC", "ADABTC", "ETHBTC", "SOLBTC",
+             "MATICBTC"]
 
 sheet.write(0, 0, "Coin")
 sheet.write(0, 1, "Qty")
@@ -522,8 +523,12 @@ def bot():
 
             original_limit = float_coin_price * (1 + profit_percentage / 100)
 
-            file_log.write("\n \nOrder " + str(order_number) + " placed :" + order_coin_name + " average buy price " + str(float_coin_price) + " Limit sell at " + str(float_coin_price * (1 + profit_percentage / 100)))
-            file_log.write("\nCoin parameters: Recent Volume % = " + str(coin_recent_vol_percentage) + " Pings = " + str(coin_pings) + " Net Volume % = " + str(coin_net_vol_percentage))
+            file_log.write(
+                "\n \nOrder " + str(order_number) + " placed :" + order_coin_name + " average buy price " + str(
+                    float_coin_price) + " Limit sell at " + str(float_coin_price * (1 + profit_percentage / 100)))
+            file_log.write(
+                "\nCoin parameters: Recent Volume % = " + str(coin_recent_vol_percentage) + " Pings = " + str(
+                    coin_pings) + " Net Volume % = " + str(coin_net_vol_percentage))
             file_log.flush()
             order_number += 1
 
@@ -591,7 +596,7 @@ def bot():
                 file_log.flush()
                 prcount += 1
 
-            elif (limit_order_count == 0 and float(lastPrice) < float_coin_price - (float_coin_price * 1 / 100)):
+            elif limit_order_count == 0 and float(lastPrice) < float_coin_price - (float_coin_price * 1 / 100):
                 limit_order_count += 1
                 try:
                     file_log.write("\n updating limit sell order" + str(limit_order_count))
@@ -614,14 +619,11 @@ def bot():
                 file_log.flush()
 
 
-            elif (limit_order_count == 1 and float(lastPrice) < float_coin_price - (float_coin_price * 2 / 100)):
+            elif limit_order_count == 1 and float(lastPrice) < float_coin_price - (float_coin_price * 2 / 100):
                 limit_order_count += 1
                 try:
-
                     file_log.write("\n updating limit sell order" + str(limit_order_count))
                     file_log.flush()
-
-
                 except Exception as e:
                     # run_starter()
                     file_log.write("\n " + str(e))
@@ -639,13 +641,11 @@ def bot():
                     "\n Limit 2  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
                 file_log.flush()
 
-            elif (limit_order_count == 2 and float(lastPrice) < float_coin_price - (float_coin_price * 4 / 100)):
+            elif limit_order_count == 2 and float(lastPrice) < float_coin_price - (float_coin_price * 4 / 100):
                 limit_order_count += 1
                 try:
                     file_log.write("\n updating limit sell order" + str(limit_order_count))
                     file_log.flush()
-
-
                 except Exception as e:
                     # run_starter()
                     file_log.write("\n " + str(e))
@@ -663,13 +663,11 @@ def bot():
                     "\n Limit 3  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
                 file_log.flush()
 
-            elif (limit_order_count == 3 and float(lastPrice) < float_coin_price - (float_coin_price * 8 / 100)):
+            elif limit_order_count == 3 and float(lastPrice) < float_coin_price - (float_coin_price * 8 / 100):
                 limit_order_count += 1
                 try:
                     file_log.write("\n updating limit sell order" + str(limit_order_count))
                     file_log.flush()
-
-
                 except Exception as e:
                     # run_starter()
                     file_log.write("\n " + str(e))
@@ -687,7 +685,7 @@ def bot():
                     "\n Limit 4  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
                 file_log.flush()
 
-            if (time.time() - startTime > 60 * 60 * 2):
+            if time.time() - startTime > 60*60*2:
                 balance = get_free_asset(order_coin_name[:-quote_length])
                 # balance=get_quantity_in_precison(order_coin_name,balance)
                 # lastPrice=average_of_market_order(placed_order['fills'])
