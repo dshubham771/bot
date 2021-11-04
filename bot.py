@@ -1,8 +1,7 @@
 import sys
 sys.path.append("/usr/local/lib/python3.9/site-packages")
-import math
 import random
-import xlwt 
+import xlwt
 from xlwt import Workbook
 wb = Workbook() 
 sheet = wb.add_sheet('Order Book',cell_overwrite_ok=True)
@@ -15,9 +14,6 @@ s=Service(ChromeDriverManager().install())
 
 
 from bs4 import BeautifulSoup
-import os
-import time
-from enum import Enum
 import secrets
 import json
 
@@ -25,7 +21,6 @@ from websocket import create_connection
 
 from binance.client import Client
 from binance.enums import *
-from binance.exceptions import BinanceAPIException, BinanceOrderException
 import math
 
 import time
@@ -678,15 +673,6 @@ def bot():
                 print("\nLimit 4  avg buy ",float_coin_price," current price ",lastPrice," limit sell at ",limit_price)
                 file_log.write("\n Limit 4  avg buy price "+str(float_coin_price)+" current price "+str(lastPrice))
                 file_log.flush()
-            
-            if(time.time() - startTime > 60*60*2):
-                balance=get_free_asset(order_coin_name[:-quote_length])
-                # balance=get_quantity_in_precison(order_coin_name,balance)
-                # lastPrice=average_of_market_order(placed_order['fills'])
-                print("\n--->Time limit exceeded  --> loss")
-                placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
-                file_log.write("\n--->Time limit exceeded --> loss ☹️ ==> buy price "+str(float_coin_price)+" sell price "+str(lastPrice))
-                sold = 1
             
             
                      
