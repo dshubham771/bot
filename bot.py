@@ -575,7 +575,7 @@ def bot():
                             file_log.write("\nLimit trailed to :" + str(limit_price))
                             file_log.flush()
 
-                        elif lastPrice < original_limit * 0.98 or lastPrice < (maxPrice-original_limit) * 0.85:
+                        elif lastPrice < original_limit * 0.98 or lastPrice < maxPrice - (maxPrice-original_limit) * 0.85:
                             file_log.write("max price = "+str(maxPrice)+"\nTrail stoploss hit ✅, Placing sell order now!" + str(limit_price))
                             file_log.flush()
                             break
