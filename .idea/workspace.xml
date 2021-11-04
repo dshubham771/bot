@@ -205,7 +205,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="&quot;refactored&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="&quot;refactored&quot;" />
+    <MESSAGE value="fixed profit trail bug" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed profit trail bug" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
