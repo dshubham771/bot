@@ -1,32 +1,24 @@
 import sys
-
 sys.path.append("/usr/local/lib/python3.9/site-packages")
 from xlwt import Workbook
-
 wb = Workbook()
 sheet = wb.add_sheet('Order Book', cell_overwrite_ok=True)
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-
 s = Service(ChromeDriverManager().install())
-
 from bs4 import BeautifulSoup
 import secrets
 import json
-
 from websocket import create_connection
-
 from binance.client import Client
 from binance.enums import *
 from binance.exceptions import BinanceAPIException, BinanceOrderException
 import math
-
 import time
 
-blacklist = ["REEFBTC", "CELRBTC", "VIBBTC", "ETCBTC", "COSBTC", "PHBBTC", "DGBBTC", "ADABTC", "ETHBTC", "SOLBTC",
-             "MATICBTC"]
+blacklist = ["REEFBTC", "CELRBTC", "VIBBTC", "ETCBTC", "COSBTC", "PHBBTC", "DGBBTC", "ADABTC", "ETHBTC", "SOLBTC", "MATICBTC"]
 
 sheet.write(0, 0, "Coin")
 sheet.write(0, 1, "Qty")
