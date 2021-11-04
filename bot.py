@@ -663,6 +663,16 @@ def bot():
                 file_log.flush()
 
 
+            if time.time() - startTime > 60*60*2:
+                balance = get_free_asset(order_coin_name[:-quote_length])
+                # balance=get_quantity_in_precison(order_coin_name,balance)
+                # lastPrice=average_of_market_order(placed_order['fills'])
+                print("\n--->Time limit exceeded  --> loss")
+                placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
+                file_log.write("\n--->Time limit exceeded --> loss ☹️ ==> buy price " + str(
+                    float_coin_price) + " sell price " + str(lastPrice))
+                file_log.flush()
+                sold = 1
 
 
 run_starter()
