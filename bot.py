@@ -25,8 +25,7 @@ import math
 
 import time
 
-blacklist = ["REEFBTC", "CELRBTC", "VIBBTC", "ETCBTC", "COSBTC", "PHBBTC", "DGBBTC", "ADABTC", "ETHBTC", "SOLBTC",
-             "MATICBTC"]
+blacklist = ["REEFBTC", "CELRBTC", "VIBBTC", "ETCBTC", "COSBTC", "PHBBTC", "DGBBTC", "ADABTC", "ETHBTC", "SOLBTC", "MATICBTC"]
 
 sheet.write(0, 0, "Coin")
 sheet.write(0, 1, "Qty")
