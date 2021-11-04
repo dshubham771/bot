@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0d654490-872f-4937-9efe-23b7271c8ca0" name="Changes" comment="&quot;refactored&quot;" />
+    <list default="true" id="0d654490-872f-4937-9efe-23b7271c8ca0" name="Changes" comment="3 limit" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,7 +23,7 @@
     </favorite-branches>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="no-time" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -188,7 +188,21 @@
       <option name="project" value="LOCAL" />
       <updated>1636006824436</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="fixed profit trail bug">
+      <created>1636016404824</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1636016404824</updated>
+    </task>
+    <task id="LOCAL-00008" summary="3 limit">
+      <created>1636016774331</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1636016774331</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -205,8 +219,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="&quot;refactored&quot;" />
-    <MESSAGE value="fixed profit trail bug" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed profit trail bug" />
+    <MESSAGE value="3 limit" />
+    <option name="LAST_COMMIT_MESSAGE" value="3 limit" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
