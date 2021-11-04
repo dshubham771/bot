@@ -576,17 +576,21 @@ def bot():
                             file_log.flush()
 
                         elif lastPrice < original_limit * 0.98 or lastPrice < (maxPrice-original_limit) * 0.85:
+                            file_log.write("max price = "+str(maxPrice)+"\nTrail stoploss hit ✅, Placing sell order now!" + str(limit_price))
+                            file_log.flush()
                             break
                         elif time.time() - startTime > 60*60*2:
+                            file_log.write("max price = "+str(maxPrice)+"\nTime limit exceeded while trailing, Placing sell order now!" + str(limit_price))
+                            file_log.flush()
                             break
 
                     placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
                     # print("executed")
                     selling_price = maxPrice
 
-                    file_log.write("\n*** profit ***  baught at " + str(float_coin_price) + " sold at " + str(
+                    file_log.write("\n*** ❤️profit❤️  ***  baught at " + str(float_coin_price) + " sold at " + str(
                         lastPrice) + " **** \n")
-                    file_log.write("\n\nTotal pnl till now is : ====>> " + str(total_pnl_amount) + "$\n")
+                    file_log.write("\n\nTotal pnl till now is : ====>> " + str(total_pnl_amount) + " $\n")
                     file_log.flush()
                     print("\n* profit baught at " + str(float_coin_price) + " sold at " + str(lastPrice) + " *")
                     sold = 1
