@@ -518,7 +518,7 @@ def bot():
         try:
             global original_limit
             placeBuyOrderExcel(order_coin_name, base_quantity, float_coin_price)
-            print("baught " + order_coin_name + " avg buy price " + str(float_coin_price))
+            print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
             startTime = time.time()
 
             original_limit = float_coin_price * (1 + profit_percentage / 100)
@@ -588,11 +588,11 @@ def bot():
                     # print("executed")
                     selling_price = maxPrice
 
-                    file_log.write("\n*** ❤️profit❤️  ***  baught at " + str(float_coin_price) + " sold at " + str(
+                    file_log.write("\n*** ❤️profit❤️  ***  bought at " + str(float_coin_price) + " sold at " + str(
                         lastPrice) + " **** \n")
                     file_log.write("\n\nTotal pnl till now is : ====>> " + str(total_pnl_amount) + " $\n")
                     file_log.flush()
-                    print("\n* profit baught at " + str(float_coin_price) + " sold at " + str(lastPrice) + " *")
+                    print("\n* profit bought at " + str(float_coin_price) + " sold at " + str(lastPrice) + " *")
                     sold = 1
 
                     time.sleep(2)
