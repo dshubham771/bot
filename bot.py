@@ -576,17 +576,21 @@ def bot():
                             file_log.flush()
 
                         elif lastPrice < original_limit * 0.98 or lastPrice < (maxPrice-original_limit) * 0.85:
+                            file_log.write("max price = "+str(maxPrice)+"\nTrail stoploss hit ✅, Placing sell order now!" + str(limit_price))
+                            file_log.flush()
                             break
                         elif time.time() - startTime > 60*60*2:
+                            file_log.write("max price = "+str(maxPrice)+"\nTime limit exceeded while trailing, Placing sell order now!" + str(limit_price))
+                            file_log.flush()
                             break
 
                     placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
                     # print("executed")
                     selling_price = maxPrice
 
-                    file_log.write("\n*** profit ***  baught at " + str(float_coin_price) + " sold at " + str(
+                    file_log.write("\n*** ❤️profit❤️  ***  baught at " + str(float_coin_price) + " sold at " + str(
                         lastPrice) + " **** \n")
-                    file_log.write("\n\nTotal pnl till now is : ====>> " + str(total_pnl_amount) + "$\n")
+                    file_log.write("\n\nTotal pnl till now is : ====>> " + str(total_pnl_amount) + " $\n")
                     file_log.flush()
                     print("\n* profit baught at " + str(float_coin_price) + " sold at " + str(lastPrice) + " *")
                     sold = 1
@@ -666,27 +670,6 @@ def bot():
                     "\n Limit 3  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
                 file_log.flush()
 
-            elif limit_order_count == 3 and float(lastPrice) < float_coin_price - (float_coin_price * 8 / 100):
-                limit_order_count += 1
-                try:
-                    file_log.write("\n updating limit sell order" + str(limit_order_count))
-                    file_log.flush()
-                except Exception as e:
-                    # run_starter()
-                    file_log.write("\n " + str(e))
-                    print(e)
-
-                quantity_so_far = quantity
-                quantity = base_quantity * 16
-                net_quantity = quantity_so_far + quantity
-                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / (net_quantity)
-                limit_price = 1.01 * float_coin_price
-                placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
-                print("\nLimit 4  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
-                      limit_price)
-                file_log.write(
-                    "\n Limit 4  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
-                file_log.flush()
 
 
 
