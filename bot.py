@@ -592,6 +592,7 @@ def bot():
                     sold = 1
 
                     time.sleep(2)
+                    continue
 
                 except Exception as e:
                     print(e)
