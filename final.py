@@ -1,4 +1,8 @@
 import sys
+import datetime
+from pytz import timezone
+from email.message import EmailMessage
+import smtplib
 
 sys.path.append("/usr/local/lib/python3.9/site-packages")
 from xlwt import Workbook
@@ -43,8 +47,8 @@ sheet.write(0, 13, "Net Vol %")
 sheet.write(0, 15, "Buy time")
 sheet.write(0, 16, "Sell time")
 
-client = Client("QoukvJkask8R91Ql1A122wtuW1IykLIDcmBYFdav1ftrqEyPY5XkrtAOTqkZDP3l",
-                "EC1kzfy9K8R5hqyJHYEEPdfvrRNHLYa1oqDhi17svEXutjWy4HCYRVQndHlVWYfr")
+client = Client("813s09H7tCSFdIzPhb4xd2VtIPkFz1onmYiZOfN7xdzmF47sEmKe1CfzlVAvsiAo",
+                "qIbFjJJXelR0xb2uIkNnukn2s5XeT1NeG3QlZJrhrhlZrkhstOHGl4wWqPcLikod")
 
 profit_percentage = 1
 stoploss_percentage = 1.5
@@ -301,8 +305,8 @@ def get_order_status(order_coin_name, target_order_id):
 def run_starter():
     global client
 
-    client = Client("QoukvJkask8R91Ql1A122wtuW1IykLIDcmBYFdav1ftrqEyPY5XkrtAOTqkZDP3l",
-                    "EC1kzfy9K8R5hqyJHYEEPdfvrRNHLYa1oqDhi17svEXutjWy4HCYRVQndHlVWYfr")
+    client = Client("813s09H7tCSFdIzPhb4xd2VtIPkFz1onmYiZOfN7xdzmF47sEmKe1CfzlVAvsiAo",
+                    "qIbFjJJXelR0xb2uIkNnukn2s5XeT1NeG3QlZJrhrhlZrkhstOHGl4wWqPcLikod")
 
     op = webdriver.ChromeOptions()
     op.add_argument('--headless')
@@ -434,14 +438,12 @@ def placeBuyOrderExcel(coin, qty, price):
     sheet.write(row, 12, coin_pings)
     sheet.write(row, 13, coin_net_vol_percentage)
 
-    t = time.localtime()
-    sheet.write(row, 15, time.strftime("%H:%M:%S", t))
+    sheet.write(row, 15, getTime())
     wb.save('orderBookExcel.xls')
 
 
 def placeSellOrderExcel(coin, qty, price):
     global row
-    global pnl
     global total_pnl_amount
     pnlAmount = qty * price - pnl
     pnlPercentage = pnlAmount / pnl * 100
@@ -450,13 +452,37 @@ def placeSellOrderExcel(coin, qty, price):
     sheet.write(row, 6, pnlAmount)
     sheet.write(row, 7, pnlPercentage)
 
-    t = time.localtime()
-    sheet.write(row, 16, time.strftime("%H:%M:%S", t))
+    sheet.write(row, 16, getTime())
 
     total_pnl_amount += pnlAmount
     sheet.write(row + 1, 6, total_pnl_amount)  # total of pnl in last row
     row += 1
     wb.save('orderBookExcel.xls')
+
+
+def getTime():
+    utc_time = datetime.datetime.now()
+    ist_time = utc_time.astimezone(timezone('Asia/Kolkata'))
+    return ist_time
+
+
+def notifyFailure(exception):
+    # To notify via email
+    currentTime = getTime()
+    msg = EmailMessage()
+    msg.set_content(exception)
+    msg['From'] = 'Watcher Bot'
+    msg['To'] = 'toaddress@example.com'
+
+    msg['Subject'] = "Bot Crashed !!! " + currentTime
+    fromaddr = 'bitforbyte771@gmail.com'
+    toaddrs = ['sds@example.com']
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    server.login('bitforbyte771@gmail.com', 's9420440771')
+    server.send_message(msg)
+    server.quit()
 
 
 #############################################################################################################################################################
@@ -492,7 +518,7 @@ def bot():
             coin_pings = taken_secret[5]
             coin_net_vol_percentage = taken_secret[6]
 
-        available_USDT = 25  # get_free_asset("USDT")
+        available_USDT = 12  # get_free_asset("USDT")
         print(available_USDT)
         usage_for_first_trade = 1
         if base_coin == "BTC":
@@ -517,19 +543,18 @@ def bot():
 
         try:
             global original_limit
+
+            placed_order = create_buy_order(order_coin_name, base_quantity)
+            float_coin_price = average_of_market_order(placed_order['fills'])
+            print("baught " + order_coin_name + " avg buy price " + str(float_coin_price))
             placeBuyOrderExcel(order_coin_name, base_quantity, float_coin_price)
-            print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
-            startTime = time.time()
-
-            original_limit = float_coin_price * (1 + profit_percentage / 100)
-
             file_log.write(
                 "\n \nOrder " + str(order_number) + " placed :" + order_coin_name + " average buy price " + str(
                     float_coin_price) + " Limit sell at " + str(float_coin_price * (1 + profit_percentage / 100)))
-            file_log.write(
-                "\nCoin parameters: Recent Volume % = " + str(coin_recent_vol_percentage) + " Pings = " + str(
-                    coin_pings) + " Net Volume % = " + str(coin_net_vol_percentage))
             file_log.flush()
+
+            startTime = time.time()
+            original_limit = float_coin_price * (1 + profit_percentage / 100)
             order_number += 1
 
         except Exception as e:
@@ -542,7 +567,6 @@ def bot():
 
         sold = 0
         limit_order_count = 0
-        time_start = time.time()
         net_quantity = base_quantity
         while not sold:
             # print("INSIDE TRADE")
@@ -567,26 +591,36 @@ def bot():
                     while True:
                         time.sleep(1)
                         lastPrice = get_price(order_coin_name)
-                        print("\nInside profit : Avg buy ", float_coin_price, " Current price ", lastPrice,
-                              " Limit sell at ", maxPrice)
+                        # print("\nInside profit : Avg buy ", float_coin_price, " Current price ", lastPrice,
+                        #       " Limit sell at ", maxPrice)
                         if lastPrice > limit_price:
                             limit_price = lastPrice
                             maxPrice = max(lastPrice, maxPrice)
                             file_log.write("\nLimit trailed to :" + str(limit_price))
                             file_log.flush()
 
-                        elif lastPrice < original_limit * 0.998 or lastPrice < maxPrice - (maxPrice-original_limit) * 0.20:
-                            file_log.write("max price = "+str(maxPrice)+"\nTrail stoploss hit ✅, Placing sell order now!" + str(limit_price))
+                        elif lastPrice < original_limit * 0.998 or lastPrice < maxPrice - (
+                                maxPrice - original_limit) * 0.20:
+                            file_log.write("max price = " + str(
+                                maxPrice) + "\nTrail stoploss hit ✅, Placing sell order now!" + str(limit_price))
                             file_log.flush()
                             break
-                        elif time.time() - startTime > 60*60*2:
-                            file_log.write("max price = "+str(maxPrice)+"\nTime limit exceeded while trailing, Placing sell order now!" + str(limit_price))
+                        elif time.time() - startTime > 60 * 60 * 2:
+                            file_log.write("max price = " + str(
+                                maxPrice) + "\nTime limit exceeded while trailing, Placing sell order now!" + str(
+                                limit_price))
                             file_log.flush()
                             break
 
-                    placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
+                    balance = get_free_asset(order_coin_name[:-quote_length])
+                    balance = round_down(order_coin_name, balance)
+                    placed_order = create_sell_order(order_coin_name, "{:f}".format(balance))
+
                     # print("executed")
                     selling_price = maxPrice
+
+                    # TODO check this balance
+                    placeSellOrderExcel(order_coin_name, balance, lastPrice)
 
                     file_log.write("\n*** ❤️profit❤️  ***  bought at " + str(float_coin_price) + " sold at " + str(
                         lastPrice) + " **** \n")
@@ -613,16 +647,23 @@ def bot():
                     file_log.write("\n " + str(e))
                     print(e)
 
-                quantity_so_far = quantity
+                quantity_so_far = net_quantity
                 quantity = base_quantity * 2
                 net_quantity = quantity_so_far + quantity
-                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / (net_quantity)
+                # float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
+
+                placed_order = create_buy_order(order_coin_name, quantity)
+                lastPrice = average_of_market_order(placed_order['fills'])
+                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
                 placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
+                print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
+
                 limit_price = 1.01 * float_coin_price
                 print("\nLimit 1  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
                       limit_price)
                 file_log.write(
-                    "\n Limit 1  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
+                    "\n Limit 1  avg buy price " + str(float_coin_price) + " current price " + str(
+                        lastPrice) + " limit sell at " + str(limit_price))
                 file_log.flush()
 
 
@@ -636,16 +677,24 @@ def bot():
                     file_log.write("\n " + str(e))
                     print(e)
 
-                quantity_so_far = quantity
+                quantity_so_far = net_quantity
                 quantity = base_quantity * 4
                 net_quantity = quantity_so_far + quantity
-                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / (net_quantity)
-                limit_price = 1.01 * float_coin_price
+                # float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / (net_quantity)
+
+                placed_order = create_buy_order(order_coin_name, quantity)
+                lastPrice = average_of_market_order(placed_order['fills'])
+                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
                 placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
+                print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
+
+                limit_price = 1.01 * float_coin_price
+
                 print("Limit 2  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
                       limit_price)
                 file_log.write(
-                    "\n Limit 2  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
+                    "\n Limit 2  avg buy price " + str(float_coin_price) + " current price " + str(
+                        lastPrice) + " limit sell at " + str(limit_price))
                 file_log.flush()
 
             elif limit_order_count == 2 and float(lastPrice) < float_coin_price - (float_coin_price * 4 / 100):
@@ -658,56 +707,68 @@ def bot():
                     file_log.write("\n " + str(e))
                     print(e)
 
-                quantity_so_far = quantity
+                quantity_so_far = net_quantity
                 quantity = base_quantity * 8
                 net_quantity = quantity_so_far + quantity
-                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / (net_quantity)
-                limit_price = 1.01 * float_coin_price
+                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
+
+                placed_order = create_buy_order(order_coin_name, quantity)
+                lastPrice = average_of_market_order(placed_order['fills'])
+                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
                 placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
+                print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
+
+                limit_price = 1.01 * float_coin_price
                 print("\nLimit 3  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
                       limit_price)
                 file_log.write(
-                    "\n Limit 3  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
+                    "\n Limit 3  avg buy price " + str(float_coin_price) + " current price " + str(
+                        lastPrice) + " limit sell at " + str(limit_price))
                 file_log.flush()
 
-            elif limit_order_count == 3 and float(lastPrice) < float_coin_price - (float_coin_price * 8 / 100):
-                limit_order_count += 1
-                try:
-                    file_log.write("\n updating limit sell order" + str(limit_order_count))
-                    file_log.flush()
-                except Exception as e:
-                    # run_starter()
-                    file_log.write("\n " + str(e))
-                    print(e)
+            # elif limit_order_count == 3 and float(lastPrice) < float_coin_price - (float_coin_price * 8 / 100):
+            #     limit_order_count += 1
+            #     try:
+            #         file_log.write("\n updating limit sell order" + str(limit_order_count))
+            #         file_log.flush()
+            #     except Exception as e:
+            #         # run_starter()
+            #         file_log.write("\n " + str(e))
+            #         print(e)
+            # 
+            #     quantity_so_far = net_quantity
+            #     quantity = base_quantity * 16
+            #     net_quantity = quantity_so_far + quantity
+            #     float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / (net_quantity)
+            # 
+            #     placed_order = create_buy_order(order_coin_name, quantity)
+            #     lastPrice = average_of_market_order(placed_order['fills'])
+            #     float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
+            #     placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
+            #     print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
+            #     
+            #     limit_price = 1.01 * float_coin_price
+            #     print("\nLimit 4  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
+            #           limit_price)
+            #     file_log.write(
+            #         "\n Limit 4  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice) + " limit sell at " + str(limit_price))
+            #     file_log.flush()
 
-                quantity_so_far = quantity
-                quantity = base_quantity * 16
-                net_quantity = quantity_so_far + quantity
-                float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / (net_quantity)
-                limit_price = 1.01 * float_coin_price
-                placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
-                print("\nLimit 4  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
-                      limit_price)
-                file_log.write(
-                    "\n Limit 4  avg buy price " + str(float_coin_price) + " current price " + str(lastPrice))
-                file_log.flush()
-
-            if time.time() - startTime > 60*60*2:
-                balance = get_free_asset(order_coin_name[:-quote_length])
-                # balance=get_quantity_in_precison(order_coin_name,balance)
-                # lastPrice=average_of_market_order(placed_order['fills'])
-                print("\n--->Time limit exceeded  --> loss")
-                placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
-                file_log.write("\n--->Time limit exceeded --> loss ☹️ ==> buy price " + str(
-                    float_coin_price) + " sell price " + str(lastPrice))
-                file_log.flush()
-                sold = 1
-
+            # if time.time() - startTime > 60*60*2:
+            #     balance = get_free_asset(order_coin_name[:-quote_length])
+            #     # balance=get_quantity_in_precison(order_coin_name,balance)
+            #     # lastPrice=average_of_market_order(placed_order['fills'])
+            #     print("\n--->Time limit exceeded  --> loss")
+            #     placeSellOrderExcel(order_coin_name, net_quantity, lastPrice)
+            #     file_log.write("\n--->Time limit exceeded --> loss ☹️ ==> buy price " + str(
+            #         float_coin_price) + " sell price " + str(lastPrice))
+            #     file_log.flush()
+            #     sold = 1
 
 
 run_starter()
 try:
-
+    getTime()
     bot()
 except Exception as e:
     file_log.write(str(e))
