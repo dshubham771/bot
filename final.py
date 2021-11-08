@@ -220,9 +220,10 @@ def convert_volume(coin, quantity, last_price):
         if lot_size[coin] < 0:
             lot_size[coin] = 0
 
-    except:
+    except Exception as e:
         print("Ran except block for lot size")
         lot_size = {coin: 0}
+        notifyFailure(e)
         pass
 
     # print(lot_size[coin])
@@ -361,6 +362,7 @@ def get_token_to_be_baught():
         soup = BeautifulSoup(content, "html5lib")
     except Exception as e:
         print(str(e))
+        notifyFailure(e)
 
     ls = []
     #     print("here")
@@ -438,7 +440,8 @@ def placeBuyOrderExcel(coin, qty, price):
     sheet.write(row, 12, coin_pings)
     sheet.write(row, 13, coin_net_vol_percentage)
 
-    sheet.write(row, 15, getTime())
+    t = time.localtime()
+    sheet.write(row, 15, time.strftime("%H:%M:%S", t))
     wb.save('orderBookExcel.xls')
 
 
@@ -452,7 +455,8 @@ def placeSellOrderExcel(coin, qty, price):
     sheet.write(row, 6, pnlAmount)
     sheet.write(row, 7, pnlPercentage)
 
-    sheet.write(row, 16, getTime())
+    t = time.localtime()
+    sheet.write(row, 16, time.strftime("%H:%M:%S", t))
 
     total_pnl_amount += pnlAmount
     sheet.write(row + 1, 6, total_pnl_amount)  # total of pnl in last row
@@ -461,28 +465,48 @@ def placeSellOrderExcel(coin, qty, price):
 
 
 def getTime():
+    print("datetime")
     utc_time = datetime.datetime.now()
+    print(utc_time)
     ist_time = utc_time.astimezone(timezone('Asia/Kolkata'))
+    print(ist_time)
     return ist_time
 
 
 def notifyFailure(exception):
     # To notify via email
-    currentTime = getTime()
-    msg = EmailMessage()
-    msg.set_content(exception)
-    msg['From'] = 'Watcher Bot'
-    msg['To'] = 'toaddress@example.com'
+    try:
+        print("Sending Email")
+        currentTime = getTime()
+        msg = EmailMessage()
+        msg.set_content(str(exception))
+        msg['From'] = 'Watcher Bot'
+        msg['To'] = 'sdshubham6@gmail.com'
 
-    msg['Subject'] = "Bot Crashed !!! " + currentTime
-    fromaddr = 'bitforbyte771@gmail.com'
-    toaddrs = ['sds@example.com']
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.starttls()
-    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-    server.login('bitforbyte771@gmail.com', 's9420440771')
-    server.send_message(msg)
-    server.quit()
+        msg['Subject'] = "Bot Crashed !!! " + currentTime
+        fromaddr = 'bitforbyte771@gmail.com'
+        toaddrs = ['sdshubham6@gmail.com']
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.login('bitforbyte771@gmail.com', 's9420440771')
+        server.send_message(msg)
+        server.quit()
+    except Exception as e:
+
+        msg = EmailMessage()
+        msg.set_content("fail")
+        msg['From'] = 'Watcher Bot'
+        msg['To'] = 'sdshubham6@gmail.com'
+        msg['Subject'] = 'DAR NETWORK FAILURE'
+        fromaddr = 'bitforbyte771@gmail.com'
+        toaddrs = ['sdshubham6@gmail.com']
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.login('bitforbyte771@gmail.com', 's9420440771')
+        server.send_message(msg)
+        server.quit()
 
 
 #############################################################################################################################################################
@@ -506,8 +530,8 @@ def bot():
 
         ls = get_token_to_be_baught()
         if not ls:
-            print("Wait 5 sec")
-            time.sleep(5)
+            print("Wait 8 sec")
+            time.sleep(8)
             continue
         else:
             print("received list: ", ls)
@@ -546,7 +570,7 @@ def bot():
 
             placed_order = create_buy_order(order_coin_name, base_quantity)
             float_coin_price = average_of_market_order(placed_order['fills'])
-            print("baught " + order_coin_name + " avg buy price " + str(float_coin_price))
+            print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
             placeBuyOrderExcel(order_coin_name, base_quantity, float_coin_price)
             file_log.write(
                 "\n \nOrder " + str(order_number) + " placed :" + order_coin_name + " average buy price " + str(
@@ -561,6 +585,7 @@ def bot():
             print(e)
             file_log.write("\n " + str(e))
             run_starter()
+            notifyFailure(e)
             continue
 
         limit_price = float_coin_price * (1 + profit_percentage / 100)
@@ -599,8 +624,7 @@ def bot():
                             file_log.write("\nLimit trailed to :" + str(limit_price))
                             file_log.flush()
 
-                        elif lastPrice < original_limit * 0.998 or lastPrice < maxPrice - (
-                                maxPrice - original_limit) * 0.20:
+                        elif lastPrice < original_limit * 0.998 or lastPrice < maxPrice - (maxPrice - original_limit) * 0.20:
                             file_log.write("max price = " + str(
                                 maxPrice) + "\nTrail stoploss hit ✅, Placing sell order now!" + str(limit_price))
                             file_log.flush()
@@ -634,6 +658,7 @@ def bot():
 
                 except Exception as e:
                     print(e)
+                    notifyFailure(e)
                 file_log.flush()
                 prcount += 1
 
@@ -645,6 +670,7 @@ def bot():
                 except Exception as e:
                     # run_starter()
                     file_log.write("\n " + str(e))
+                    notifyFailure(e)
                     print(e)
 
                 quantity_so_far = net_quantity
@@ -657,7 +683,7 @@ def bot():
                 float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
                 placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
                 print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
-
+                original_limit = float_coin_price * (1 + profit_percentage / 100)
                 limit_price = 1.01 * float_coin_price
                 print("\nLimit 1  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
                       limit_price)
@@ -675,6 +701,7 @@ def bot():
                 except Exception as e:
                     # run_starter()
                     file_log.write("\n " + str(e))
+                    notifyFailure(e)
                     print(e)
 
                 quantity_so_far = net_quantity
@@ -687,6 +714,7 @@ def bot():
                 float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
                 placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
                 print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
+                original_limit = float_coin_price * (1 + profit_percentage / 100)
 
                 limit_price = 1.01 * float_coin_price
 
@@ -706,6 +734,7 @@ def bot():
                     # run_starter()
                     file_log.write("\n " + str(e))
                     print(e)
+                    notifyFailure(e)
 
                 quantity_so_far = net_quantity
                 quantity = base_quantity * 8
@@ -717,6 +746,7 @@ def bot():
                 float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
                 placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
                 print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
+                original_limit = float_coin_price * (1 + profit_percentage / 100)
 
                 limit_price = 1.01 * float_coin_price
                 print("\nLimit 3  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
@@ -735,6 +765,7 @@ def bot():
             #         # run_starter()
             #         file_log.write("\n " + str(e))
             #         print(e)
+            #         notifyFailure(e)
             # 
             #     quantity_so_far = net_quantity
             #     quantity = base_quantity * 16
@@ -746,6 +777,7 @@ def bot():
             #     float_coin_price = (lastPrice * quantity + float_coin_price * quantity_so_far) / net_quantity
             #     placeBuyOrderExcel(order_coin_name, net_quantity, float_coin_price)
             #     print("bought " + order_coin_name + " avg buy price " + str(float_coin_price))
+            #     original_limit = float_coin_price * (1 + profit_percentage / 100)
             #     
             #     limit_price = 1.01 * float_coin_price
             #     print("\nLimit 4  avg buy ", float_coin_price, " current price ", lastPrice, " limit sell at ",
@@ -768,7 +800,6 @@ def bot():
 
 run_starter()
 try:
-    getTime()
     bot()
 except Exception as e:
     file_log.write(str(e))
