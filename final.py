@@ -30,7 +30,7 @@ import math
 import time
 
 blacklist = ["REEFBTC", "CELRBTC", "VIBBTC", "ETCBTC", "COSBTC", "PHBBTC", "DGBBTC", "ADABTC", "ETHBTC", "SOLBTC",
-             "MATICBTC"]
+             "MATICBTC", "UNIBTC","STPTBTC", "XRPBTC", "VETBTC"]
 
 sheet.write(0, 0, "Coin")
 sheet.write(0, 1, "Qty")
@@ -382,7 +382,7 @@ def get_token_to_be_baught():
         coin_symbol, base_coin = pair.split("_")
         base_coin = "USDT"
         coin_name = coin_symbol + base_coin
-
+        coin_name2 = coin_symbol + "BTC"
         if not check_availability(coin_name):
             continue
 
@@ -409,7 +409,7 @@ def get_token_to_be_baught():
             count += 1
 
         print(coin_name)
-        if recent_vol_percentage > 0.7 and pings > 5 and pings < 16 and net_vol_percentage > 5:
+        if recent_vol_percentage > 0.7 and pings > 5 and pings < 16 and net_vol_percentage > 3 and coin_name2 not in blacklist:
             print("chosen ", pair)
             ls.append([coin_name, percent_change_price, coin_symbol, base_coin, recent_vol_percentage, pings,
                        net_vol_percentage])
@@ -566,7 +566,6 @@ def bot():
             continue
 
         try:
-            global original_limit
 
             placed_order = create_buy_order(order_coin_name, base_quantity)
             float_coin_price = average_of_market_order(placed_order['fills'])
@@ -616,23 +615,21 @@ def bot():
                     while True:
                         time.sleep(1)
                         lastPrice = get_price(order_coin_name)
-                        # print("\nInside profit : Avg buy ", float_coin_price, " Current price ", lastPrice,
-                        #       " Limit sell at ", maxPrice)
+                        print("\nInside profit : Avg buy ", float_coin_price, " Current price ", lastPrice,
+                              " Limit sell at ", maxPrice)
                         if lastPrice > limit_price:
                             limit_price = lastPrice
                             maxPrice = max(lastPrice, maxPrice)
                             file_log.write("\nLimit trailed to :" + str(limit_price))
                             file_log.flush()
-
-                        elif lastPrice < original_limit * 0.998 or lastPrice < maxPrice - (maxPrice - original_limit) * 0.20:
+                        elif lastPrice < limit_price - limit_price * trail_stoploss_percentage:
                             file_log.write("max price = " + str(
                                 maxPrice) + "\nTrail stoploss hit ✅, Placing sell order now!" + str(limit_price))
                             file_log.flush()
                             break
                         elif time.time() - startTime > 60 * 60 * 2:
                             file_log.write("max price = " + str(
-                                maxPrice) + "\nTime limit exceeded while trailing, Placing sell order now!" + str(
-                                limit_price))
+                                maxPrice) + "\nTime limit exceeded while trailing, Placing sell order now!" + str(limit_price))
                             file_log.flush()
                             break
 
